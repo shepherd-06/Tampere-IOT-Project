@@ -33,7 +33,9 @@ app.layout = html.Div([
         placeholder='Select a product'
     ),
     html.Div(id='product-info'),
-    html.Div(id='attribute-info'),  # Ensure this is included in the layout
+    html.Div(id='attribute-info'),
+    # Div to hold the attribute data graph
+    html.Div(id='attribute-data-graph'),
     html.Button('Fetch Historical Data', id='fetch-button', n_clicks=0),
     dcc.Graph(id='historical-data', style={'display': 'none'}),
     html.Button('Predict Next 24 Hours', id='predict-button', n_clicks=0),
@@ -58,7 +60,9 @@ def display_metadata(product_id):
                         html.Span(processed_name, style={
                                   'margin-right': '10px'}),
                         html.Button(
-                            'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']}, n_clicks=0, style={'margin-left': '10px'})
+                            'Fetch Data', id={'type': 'fetch-data-button',
+                                              'index': attr['id']},
+                            n_clicks=0, style={'margin-left': '10px'})
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
                 )
             return html.Div([
@@ -66,26 +70,42 @@ def display_metadata(product_id):
                 html.Div([
                     html.Ul(attributes, style={
                             'list-style-type': 'none', 'padding': 0})
-                ], style={'max-height': '200px', 'overflow-y': 'auto',
-                          'border': '1px solid #ccc', 'padding': '10px'})
+                ], style={'max-height': '200px', 'overflow-y': 'auto', 'border': '1px solid #ccc', 'padding': '10px'})
             ])
     return html.P("Select a product to see details.")
 
 
 @app.callback(
     Output('attribute-info', 'children'),
+    Output('attribute-data-graph', 'children'),
     [Input({'type': 'fetch-data-button', 'index': ALL}, 'n_clicks')],
     [State({'type': 'fetch-data-button', 'index': ALL}, 'id')]
 )
 def fetch_data(n_clicks, ids):
+    if not any(n_clicks):
+        return "No button clicked yet.", ""
     button_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if button_id:
         attr_id = json.loads(button_id.split('.')[0])['index']
         data = call_external_api(attr_id)
-        return html.Div([
-            html.P(f"Button {attr_id} clicked."),
-            html.Pre(json.dumps(data, indent=2))
-        ])
+
+        if isinstance(data, list) and len(data) > 0 and 'statistics' in data[0]:
+            df = pd.DataFrame(data[0]['statistics'])
+            df['ds'] = pd.to_datetime(df['stattime'], unit='ms')
+            
+            # Generate title
+            first_time = df['ds'].min().strftime('%Y-%m-%d %H:%M:%S')
+            last_time = df['ds'].max().strftime('%Y-%m-%d %H:%M:%S')
+            title = f"Bar chart of [add_name_later] from {first_time} to {last_time}"
+
+            # Create a bar chart
+            fig = px.bar(df, x='ds', y='sum', title='')  # Empty title for now
+            return (html.Div([
+                html.P(f"{title}"),
+            ]), dcc.Graph(figure=fig))
+        else:
+            return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""
+    return "No button clicked.", ""
 
 
 @app.callback(

@@ -97,15 +97,15 @@ def fetch_data(n_clicks, ids):
             df['ds'] = pd.to_datetime(df['stattime'], unit='ms')
 
             # Generate title
-            first_time = df['ds'].min().strftime('%Y-%m-%d %H:%M:%S')
-            last_time = df['ds'].max().strftime('%Y-%m-%d %H:%M:%S')
+            first_time = df['ds'].min().strftime('%Y-%m-%d')
+            last_time = df['ds'].max().strftime('%Y-%m-%d')
 
             title = f"Bar chart of [add_name_later] from {first_time} to {last_time}"
 
             # Create a bar chart
-            fig = px.bar(df, x='ds', y='sum', title='')  # Empty title for now
+            fig = px.bar(df, x='ds', y='sum', title=title)
             return (html.Div([
-                html.H3(title, style={'text-align': 'center'}),
+                html.H3(""),
             ]), dcc.Graph(figure=fig))
         else:
             return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""

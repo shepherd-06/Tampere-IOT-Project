@@ -2,26 +2,28 @@
 
 ## Project Overview
 
-This project aims to create a comprehensive occupancy data dashboard for Kalevan liikuntapuisto in Tampere City. The dashboard displays historical occupancy data and provides a 30-day forecast using Prophet for predicting future occupancy trends. This project was developed as part of the Tampere City IoT Hackathon on June 11, completed within 6 hours.
+This project aims to create a comprehensive occupancy data dashboard for Kalevan liikuntapuisto in Tampere City. The dashboard displays historical occupancy data and provides a 30-day forecast using Prophet for predicting future occupancy trends. Additionally, the dashboard includes usage data in terms of total seconds the facility has been used by all users, converted to hours. This project was developed as part of the Imagine 2024 Tampere Program on June 11, completed within 6 hours. Data was provided by Wapice.
+
+This project is deployed at `https://imagine2024.ibtehaz.xyz`. The website is optimized for PC only at this moment.
 
 ## Features
 
 ### Data Visualization
 
-Displays historical occupancy data in an interactive bar chart.
-Provides clear axis titles for better understanding: "Days" on the x-axis and "Occupancy (Total)" on the y-axis.
+- Displays historical occupancy data in an interactive bar chart.
+- Provides clear axis titles for better understanding: "Days" on the x-axis and "Occupancy (Total)" or "Usage (Hours)" on the y-axis, depending on the data type.
 
 ### Forecasting
 
-Generates a 30-day occupancy forecast using Prophet.
-Forecast data is displayed in a line chart.
-A table displays the forecasted occupancy alongside the graph for easy reference.
+- Generates a 30-day occupancy forecast using Prophet.
+- Forecast data is displayed in a line chart.
+- ~~A table displays the forecasted occupancy alongside the graph for easy reference.~~
 
 ### Interactive UI
 
-Users can select a specific product to view detailed data and forecasts.
-Loading spinner to indicate data fetching.
-Bootstrap integration for a responsive and aesthetically pleasing UI.
+- Users can select a specific product to view detailed data and forecasts.
+- Loading spinner to indicate data fetching.
+- Bootstrap integration for a responsive and aesthetically pleasing UI.
 
 ## Installation
 
@@ -59,13 +61,13 @@ Open a web browser and go to `http://127.0.0.1:8050/` to view the dashboard.
 
 ### Dashboard
 
-* Dropdown Menu: Allows the user to select a specific location's occupancy data.
-* Fetch Data Button: Fetches historical occupancy data for the selected location.
-* Predict Button: Generates a 30-day forecast based on the fetched historical data.
+- Dropdown Menu: Allows the user to select a specific location's occupancy data.
+- Fetch Data Button: Fetches historical occupancy data for the selected location.
+- Predict Button: Generates a 30-day forecast based on the fetched historical data.
 
 ### Prediction Model
 
-The prediction model uses Prophet to generate forecasts. The model takes the historical data, processes it, and predicts future occupancy for the next 30 days. The results are displayed in both a line chart and a table format.
+The prediction model uses Prophet to generate forecasts. The model takes the historical data, processes it, and predicts future occupancy for the next 30 days. The results are displayed in both a line chart ~~and a table format~~.
 
 ### Example Graphs
 
@@ -77,17 +79,21 @@ The prediction model uses Prophet to generate forecasts. The model takes the his
 
 ![30 Day Usage Forecast of Beach-Kentaa from Feb 12 to Mar 12](https://github.com/shepherd-06/Tampere-IOT-Project/blob/master/images/plot_1_prediction.png)
 
+### Deployment
+
+This project is deployed at `https://imagine2024.ibtehaz.xyz`. The website is optimized for PC only at this moment.
+
 ## Acknowledgements
 
-This project was developed for the Tampere City IoT Hackathon on June 11. Special thanks to the organizers and participants for their support and collaboration.
+This project was developed for the Imagine 2024 Tampere Program on June 11. Special thanks to the organizers and participants for their support and collaboration and to Wpice for the dataset.
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is ~~licensed under the MIT License. See the LICENSE file for details.~~ unlicensed.
 
 ## Contact
 
 For any questions or suggestions, please contact:
 
-* Name: Mohammad Asif Ibtehaz
-* Email: `asif.ibtehaz@tuni.fi`
+- Name: Mohammad Asif Ibtehaz
+- Email: `asif.ibtehaz@tuni.fi`

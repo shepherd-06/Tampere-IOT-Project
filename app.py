@@ -55,7 +55,15 @@ app.layout = html.Div([
             html.Div(id='prediction-graph', className="container mt-4")
         ],
         style={'marginTop': 50}
-    )
+    ),
+    # Footer
+    html.Footer([
+        html.P([
+            "Developed by Ibtehaz - ",
+            html.A("https://ibtehaz.xyz",
+                   href="https://ibtehaz.xyz", target="_blank")
+        ], className="text-center my-4")
+    ], className="container")
 ], className="container")
 
 

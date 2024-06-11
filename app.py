@@ -71,9 +71,9 @@ def display_metadata(product_id):
             attributes = []
             for attr in product['attributes']:
                 # processed_name = process_attribute_name(attr['name'])
-                if 'user_count' in attr['name'] or 'visit_count' in attr['name']:
+                if 'user_count' in attr['name'] or 'visit_count' in attr['name'] or 'use_seconds' in attr['name']:
                     processed_name = attr['name']
-                
+
                     attributes.append(
                         html.Li([
                             html.Span(processed_name, className="mr-3"),
@@ -109,10 +109,21 @@ def fetch_data(n_clicks, ids):
         attr_id = index[0]
         processed_name = process_attribute_name(index[1])
         data = call_external_api(attr_id)
+        is_seconds = False
+        if 'use_seconds' in index[1]:
+            is_seconds = True
 
         if isinstance(data, list) and len(data) > 0 and 'statistics' in data[0]:
             df = pd.DataFrame(data[0]['statistics'])
             df['ds'] = pd.to_datetime(df['stattime'], unit='ms')
+
+            # Group by the date part of 'ds' and sum the 'sum' values
+            df = df.groupby(df['ds'].dt.date).agg({'sum': 'sum'}).reset_index()
+            # Convert 'ds' back to datetime
+            df['ds'] = pd.to_datetime(df['ds'])
+
+            if is_seconds:
+                df['sum'] = df['sum'] / 3600  # Convert seconds to hours
 
             # Generate title
             first_time = df['ds'].min().strftime('%Y-%m-%d')
@@ -121,9 +132,14 @@ def fetch_data(n_clicks, ids):
             title = f"Bar chart of {processed_name} from {first_time} to {last_time}"
 
             # Create a bar chart with Seaborn color palette
-            fig = px.bar(df, x='ds', y='sum', title=title,
-                         labels={'ds': 'Days', 'sum': 'Occupancy (Total)'},
-                         color_discrete_sequence=seaborn_palette)
+            if is_seconds:
+                fig = px.bar(df, x='ds', y='sum', title=title,
+                            labels={'ds': 'Days', 'sum': 'Usage (Hours)'},
+                            color_discrete_sequence=seaborn_palette)
+            else:
+                fig = px.bar(df, x='ds', y='sum', title=title,
+                            labels={'ds': 'Days', 'sum': 'Occupancy (Total)'},
+                            color_discrete_sequence=seaborn_palette)
             return (html.Div([
                 html.H3("", className="mt-4"),
                 html.Button('Predict Next 30 Days', id='predict-button',
@@ -158,7 +174,8 @@ def update_forecast(n_clicks, graph_data):
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
                                title=f'30 Days Forecast from {first_time} to {last_time}',
-                               labels={'ds': 'Days', 'yhat': 'Occupancy (Total)'},
+                               labels={'ds': 'Days',
+                                       'yhat': 'Occupancy (Total)'},
                                color_discrete_sequence=seaborn_palette)
 
         return html.Div([

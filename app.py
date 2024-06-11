@@ -2,7 +2,7 @@ import json
 import pandas as pd
 from dash import Dash, dcc, html, Input, Output
 import plotly.express as px
-from utility import parse_attributes
+from utility import process_attribute_name
 app = Dash(__name__)
 
 # Load metadata
@@ -61,13 +61,20 @@ def display_metadata(product_id):
         product = next(
             (prod for prod in products if prod['id'] == product_id), None)
         if product:
-            attributes = html.Ul([html.Li(attr['name'])
-                                 for attr in product['attributes']])
+            attributes = []
+            for attr in product['attributes']:
+                processed_name = process_attribute_name(attr['name'])
+                attributes.append(
+                    html.Li([
+                        html.Span(processed_name, style={
+                                  'margin-right': '10px'}),
+                        html.Button(
+                            'Fetch Data', id=f'fetch-{attr["id"]}', n_clicks=0, style={'margin-left': '10px'})
+                    ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
+                )
             return html.Div([
                 html.H2(product['name']),
-                html.P(product['description']),
-                html.H3("Attributes:"),
-                attributes
+                html.Ul(attributes)
             ])
     return html.P("Select a product to see details.")
 

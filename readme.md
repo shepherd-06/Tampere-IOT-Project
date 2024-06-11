@@ -4,7 +4,7 @@
 
 This project aims to create a comprehensive occupancy data dashboard for Kalevan liikuntapuisto in Tampere City. The dashboard displays historical occupancy data and provides a 30-day forecast using Prophet for predicting future occupancy trends. Additionally, the dashboard includes usage data in terms of total seconds the facility has been used by all users, converted to hours. This project was developed as part of the Imagine 2024 Tampere Program on June 11, completed within 6 hours. Data was provided by Wapice.
 
-This project is deployed at `https://imagine2024.ibtehaz.xyz`. The website is optimized for PC only at this moment.
+This project is deployed at https://imagine2024.ibtehaz.xyz. The website is optimized for PC only at this moment.
 
 ## Features
 
@@ -81,7 +81,7 @@ The prediction model uses Prophet to generate forecasts. The model takes the his
 
 ### Deployment
 
-This project is deployed at `https://imagine2024.ibtehaz.xyz`. The website is optimized for PC only at this moment.
+This project is deployed at https://imagine2024.ibtehaz.xyz. The website is optimized for PC only at this moment.
 
 ## Acknowledgements
 

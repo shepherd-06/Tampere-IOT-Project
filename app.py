@@ -4,6 +4,7 @@ import dash
 from dash import Dash, dcc, html, Input, Output, State, ALL
 import plotly.express as px
 from utility import process_attribute_name, call_external_api
+from predict import make_prediction
 
 app = Dash(__name__, suppress_callback_exceptions=True)
 
@@ -39,7 +40,8 @@ app.layout = html.Div([
         id='loading-spinner',
         type='circle',
         children=[
-            html.Div(id='attribute-data-graph')
+            html.Div(id='attribute-data-graph'),
+            html.Div(id='prediction-graph')  # Div to hold the prediction graph
         ],
         style={'marginTop': 50}
     )
@@ -63,8 +65,7 @@ def display_metadata(product_id):
                         html.Span(processed_name, style={
                                   'margin-right': '10px'}),
                         html.Button(
-                            'Fetch Data', id={'type': 'fetch-data-button',
-                                              'index': attr['id']},
+                            'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']},
                             n_clicks=0, style={'margin-left': '10px'})
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
                 )
@@ -106,10 +107,34 @@ def fetch_data(n_clicks, ids):
             fig = px.bar(df, x='ds', y='sum', title=title)
             return (html.Div([
                 html.H3(""),
+                html.Button('Predict Next 7 Days',
+                            id='predict-button', n_clicks=0)
             ]), dcc.Graph(figure=fig))
         else:
             return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""
     return "", ""
+
+
+@app.callback(
+    Output('prediction-graph', 'children'),
+    Input('predict-button', 'n_clicks'),
+    State('attribute-data-graph', 'children')
+)
+def update_forecast(n_clicks, graph_data):
+    if n_clicks == 0:
+        return ""
+
+    if graph_data and 'props' in graph_data:
+        fig = graph_data['props']['figure']
+        df = pd.DataFrame(fig['data'][0]['x'], columns=['ds'])
+        df['y'] = fig['data'][0]['y']
+        forecast = make_prediction(df)
+
+        fig_forecast = px.line(forecast, x='ds', y='yhat',
+                               title='7 Days Forecast')
+
+        return dcc.Graph(figure=fig_forecast)
+    return ""
 
 
 if __name__ == '__main__':

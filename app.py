@@ -134,12 +134,12 @@ def fetch_data(n_clicks, ids):
             # Create a bar chart with Seaborn color palette
             if is_seconds:
                 fig = px.bar(df, x='ds', y='sum', title=title,
-                            labels={'ds': 'Days', 'sum': 'Usage (Hours)'},
-                            color_discrete_sequence=seaborn_palette)
+                             labels={'ds': 'Days', 'sum': 'Usage (Hours)'},
+                             color_discrete_sequence=seaborn_palette)
             else:
                 fig = px.bar(df, x='ds', y='sum', title=title,
-                            labels={'ds': 'Days', 'sum': 'Occupancy (Total)'},
-                            color_discrete_sequence=seaborn_palette)
+                             labels={'ds': 'Days', 'sum': 'Occupancy (Total)'},
+                             color_discrete_sequence=seaborn_palette)
             return (html.Div([
                 html.H3("", className="mt-4"),
                 html.Button('Predict Next 30 Days', id='predict-button',
@@ -175,7 +175,7 @@ def update_forecast(n_clicks, graph_data):
         fig_forecast = px.line(forecast, x='ds', y='yhat',
                                title=f'30 Days Forecast from {first_time} to {last_time}',
                                labels={'ds': 'Days',
-                                       'yhat': 'Occupancy (Total)'},
+                                       'yhat': 'Occupancy (Total) or Usage (Hours)'},
                                color_discrete_sequence=seaborn_palette)
 
         return html.Div([

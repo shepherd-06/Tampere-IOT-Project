@@ -6,7 +6,12 @@ import plotly.express as px
 from utility import process_attribute_name, call_external_api
 from predict import make_prediction
 
-app = Dash(__name__, suppress_callback_exceptions=True)
+# Add external stylesheet for Bootstrap
+external_stylesheets = [
+    'https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css']
+
+app = Dash(__name__, suppress_callback_exceptions=True,
+           external_stylesheets=external_stylesheets)
 
 # Load metadata
 with open('metadata.json') as f:
@@ -25,27 +30,29 @@ products = [
 
 # Dash layout
 app.layout = html.Div([
-    html.H1("Occupancy Data Dashboard"),
-    html.Div(id='metadata'),
+    html.H1("Occupancy Data Dashboard", className="text-center my-4"),
+    html.Div(id='metadata', className="container"),
     dcc.Dropdown(
         id='product-dropdown',
         options=[{'label': prod['name'], 'value': prod['id']}
                  for prod in products],
-        placeholder='Select a product'
+        placeholder='Select a product',
+        className="form-control my-3"
     ),
-    html.Div(id='product-info'),
-    html.Div(id='attribute-info'),
+    html.Div(id='product-info', className="container"),
+    html.Div(id='attribute-info', className="container"),
     # Div to hold the attribute data graph
     dcc.Loading(
         id='loading-spinner',
         type='circle',
         children=[
-            html.Div(id='attribute-data-graph'),
-            html.Div(id='prediction-graph')  # Div to hold the prediction graph
+            html.Div(id='attribute-data-graph', className="container"),
+            # Div to hold the prediction graph
+            html.Div(id='prediction-graph', className="container mt-4")
         ],
         style={'marginTop': 50}
     )
-])
+], className="container")
 
 
 @app.callback(
@@ -59,24 +66,24 @@ def display_metadata(product_id):
         if product:
             attributes = []
             for attr in product['attributes']:
-                processed_name = process_attribute_name(attr['name'])
+                # processed_name = process_attribute_name(attr['name'])
+                processed_name = attr['name']
                 attributes.append(
                     html.Li([
-                        html.Span(processed_name, style={
-                                  'margin-right': '10px'}),
+                        html.Span(processed_name, className="mr-3"),
                         html.Button(
                             'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']},
-                            n_clicks=0, style={'margin-left': '10px'})
-                    ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
+                            n_clicks=0, className="btn btn-primary ml-3")
+                    ], className="d-flex align-items-center mb-2")
                 )
             return html.Div([
-                html.H2(f"Location: {product['name']}"),
+                html.H4(f"Location: {product['name']}", className="my-3 text-center"),
                 html.Div([
-                    html.Ul(attributes, style={
-                            'list-style-type': 'none', 'padding': 0})
-                ], style={'max-height': '200px', 'overflow-y': 'auto', 'border': '1px solid #ccc', 'padding': '10px'})
+                    html.Ul(attributes, className="list-unstyled p-2", style={
+                            'max-height': '200px', 'overflow-y': 'auto', 'border': '1px solid #ccc'})
+                ], className="p-3 border")
             ])
-    return html.P("Select a product to see details.")
+    return html.P("Select a product to see details.", className="text-muted")
 
 
 @app.callback(
@@ -106,12 +113,12 @@ def fetch_data(n_clicks, ids):
             # Create a bar chart
             fig = px.bar(df, x='ds', y='sum', title=title)
             return (html.Div([
-                html.H3(""),
-                html.Button('Predict Next 7 Days',
-                            id='predict-button', n_clicks=0)
+                html.H3("", className="mt-4"),
+                html.Button('Predict Next 7 Days', id='predict-button',
+                            n_clicks=0, className="btn btn-primary mt-3")
             ]), dcc.Graph(figure=fig))
         else:
-            return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""
+            return html.Div([html.P(f"No statistics found for attribute {attr_id}.", className="text-danger")]), ""
     return "", ""
 
 
@@ -130,19 +137,20 @@ def update_forecast(n_clicks, graph_data):
         df = pd.DataFrame(
             {'ds': fig['data'][0]['x'], 'y': fig['data'][0]['y']})
         forecast = make_prediction(df)
-        
+
         forecast['ds'] = forecast['ds'].dt.strftime('%Y-%m-%d')
         forecast['yhat'] = forecast['yhat'].round().astype(int)
-        
+
         first_time = forecast['ds'].min()
         last_time = forecast['ds'].max()
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
                                title=f'7 Days Forecast from {first_time} to {last_time}')
 
+
         return html.Div([
             html.Div(dcc.Graph(figure=fig_forecast)),
-        ]), {"display": "inline-block"}
+            ]), {"display": "inline-block"}
     return "", {"width": "100%"}
 
 

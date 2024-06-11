@@ -78,7 +78,7 @@ def display_metadata(product_id):
                         html.Li([
                             html.Span(processed_name, className="mr-3"),
                             html.Button(
-                                'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']},
+                                'Fetch Data', id={'type': 'fetch-data-button', 'index': f"{attr['id']}${processed_name}"},
                                 n_clicks=0, className="btn btn-primary ml-3")
                         ], className="d-flex align-items-center mb-2")
                     )
@@ -104,7 +104,10 @@ def fetch_data(n_clicks, ids):
         return "", ""
     button_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if button_id:
-        attr_id = json.loads(button_id.split('.')[0])['index']
+        index = json.loads(button_id.split('.')[0])['index']
+        index = index.split("$")
+        attr_id = index[0]
+        processed_name = process_attribute_name(index[1])
         data = call_external_api(attr_id)
 
         if isinstance(data, list) and len(data) > 0 and 'statistics' in data[0]:
@@ -115,7 +118,7 @@ def fetch_data(n_clicks, ids):
             first_time = df['ds'].min().strftime('%Y-%m-%d')
             last_time = df['ds'].max().strftime('%Y-%m-%d')
 
-            title = f"Bar chart of [add_name_later] from {first_time} to {last_time}"
+            title = f"Bar chart of {processed_name} from {first_time} to {last_time}"
 
             # Create a bar chart with Seaborn color palette
             fig = px.bar(df, x='ds', y='sum', title=title,

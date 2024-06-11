@@ -35,7 +35,14 @@ app.layout = html.Div([
     html.Div(id='product-info'),
     html.Div(id='attribute-info'),
     # Div to hold the attribute data graph
-    html.Div(id='attribute-data-graph'),
+    dcc.Loading(
+        id='loading-spinner',
+        type='circle',
+        children=[
+            html.Div(id='attribute-data-graph')
+        ],
+        style={'marginTop': 50}
+    ),
     html.Button('Fetch Historical Data', id='fetch-button', n_clicks=0),
     dcc.Graph(id='historical-data', style={'display': 'none'}),
     html.Button('Predict Next 24 Hours', id='predict-button', n_clicks=0),
@@ -60,7 +67,7 @@ def display_metadata(product_id):
                         html.Span(processed_name, style={
                                   'margin-right': '10px'}),
                         html.Button(
-                            'Fetch Data', id={'type': 'fetch-data-button',
+                            'Fetch Data', id={'type': 'fetch-data-button', 
                                               'index': attr['id']},
                             n_clicks=0, style={'margin-left': '10px'})
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
@@ -92,10 +99,11 @@ def fetch_data(n_clicks, ids):
         if isinstance(data, list) and len(data) > 0 and 'statistics' in data[0]:
             df = pd.DataFrame(data[0]['statistics'])
             df['ds'] = pd.to_datetime(df['stattime'], unit='ms')
-            
+
             # Generate title
             first_time = df['ds'].min().strftime('%Y-%m-%d %H:%M:%S')
             last_time = df['ds'].max().strftime('%Y-%m-%d %H:%M:%S')
+
             title = f"Bar chart of [add_name_later] from {first_time} to {last_time}"
 
             # Create a bar chart

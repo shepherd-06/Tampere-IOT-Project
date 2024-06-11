@@ -70,7 +70,8 @@ def display_metadata(product_id):
         if product:
             attributes = []
             for attr in product['attributes']:
-                processed_name = process_attribute_name(attr['name'])
+                # processed_name = process_attribute_name(attr['name'])
+                processed_name = attr['name']
                 attributes.append(
                     html.Li([
                         html.Span(processed_name, className="mr-3"),
@@ -116,6 +117,7 @@ def fetch_data(n_clicks, ids):
 
             # Create a bar chart with Seaborn color palette
             fig = px.bar(df, x='ds', y='sum', title=title,
+                         labels={'ds': 'Days', 'sum': 'Occupancy (Total)'},
                          color_discrete_sequence=seaborn_palette)
             return (html.Div([
                 html.H3("", className="mt-4"),
@@ -151,6 +153,7 @@ def update_forecast(n_clicks, graph_data):
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
                                title=f'7 Days Forecast from {first_time} to {last_time}',
+                               labels={'ds': 'Days', 'yhat': 'Occupancy (Total)'},
                                color_discrete_sequence=seaborn_palette)
 
         return html.Div([

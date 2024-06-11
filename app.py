@@ -3,6 +3,7 @@ import pandas as pd
 import dash
 from dash import Dash, dcc, html, Input, Output, State, ALL
 import plotly.express as px
+import seaborn as sns
 from utility import process_attribute_name, call_external_api
 from predict import make_prediction
 
@@ -27,6 +28,9 @@ products = [
     }
     for item in metadata
 ]
+
+# Seaborn color palette
+seaborn_palette = sns.color_palette("Set2").as_hex()
 
 # Dash layout
 app.layout = html.Div([
@@ -66,8 +70,7 @@ def display_metadata(product_id):
         if product:
             attributes = []
             for attr in product['attributes']:
-                # processed_name = process_attribute_name(attr['name'])
-                processed_name = attr['name']
+                processed_name = process_attribute_name(attr['name'])
                 attributes.append(
                     html.Li([
                         html.Span(processed_name, className="mr-3"),
@@ -77,7 +80,8 @@ def display_metadata(product_id):
                     ], className="d-flex align-items-center mb-2")
                 )
             return html.Div([
-                html.H4(f"Location: {product['name']}", className="my-3 text-center"),
+                html.H4(f"Location: {product['name']}",
+                        className="my-3 text-center"),
                 html.Div([
                     html.Ul(attributes, className="list-unstyled p-2", style={
                             'max-height': '200px', 'overflow-y': 'auto', 'border': '1px solid #ccc'})
@@ -110,8 +114,9 @@ def fetch_data(n_clicks, ids):
 
             title = f"Bar chart of [add_name_later] from {first_time} to {last_time}"
 
-            # Create a bar chart
-            fig = px.bar(df, x='ds', y='sum', title=title)
+            # Create a bar chart with Seaborn color palette
+            fig = px.bar(df, x='ds', y='sum', title=title,
+                         color_discrete_sequence=seaborn_palette)
             return (html.Div([
                 html.H3("", className="mt-4"),
                 html.Button('Predict Next 7 Days', id='predict-button',
@@ -145,12 +150,12 @@ def update_forecast(n_clicks, graph_data):
         last_time = forecast['ds'].max()
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
-                               title=f'7 Days Forecast from {first_time} to {last_time}')
-
+                               title=f'7 Days Forecast from {first_time} to {last_time}',
+                               color_discrete_sequence=seaborn_palette)
 
         return html.Div([
             html.Div(dcc.Graph(figure=fig_forecast)),
-            ]), {"display": "inline-block"}
+        ]), {"display": "inline-block"}
     return "", {"width": "100%"}
 
 

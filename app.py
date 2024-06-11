@@ -101,7 +101,7 @@ def fetch_data(n_clicks, ids):
             # Create a bar chart
             fig = px.bar(df, x='ds', y='sum', title='')  # Empty title for now
             return (html.Div([
-                html.P(f"{title}"),
+                html.H3(title, style={'text-align': 'center'}),
             ]), dcc.Graph(figure=fig))
         else:
             return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""

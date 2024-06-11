@@ -131,13 +131,11 @@ def update_forecast(n_clicks, graph_data):
             {'ds': fig['data'][0]['x'], 'y': fig['data'][0]['y']})
         forecast = make_prediction(df)
         
-        first_time = df['ds'].min()
-        last_time = df['ds'].max()
-        first_time = first_time[0:-9]
-        last_time = last_time[0:-9]
-
         forecast['ds'] = forecast['ds'].dt.strftime('%Y-%m-%d')
         forecast['yhat'] = forecast['yhat'].round().astype(int)
+        
+        first_time = forecast['ds'].min()
+        last_time = forecast['ds'].max()
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
                                title=f'7 Days Forecast from {first_time} to {last_time}')

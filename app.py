@@ -1,28 +1,15 @@
 import json
 import pandas as pd
-from dash import Dash, dcc, html, Input, Output
+import dash
+from dash import Dash, dcc, html, Input, Output, State, ALL
 import plotly.express as px
-from utility import process_attribute_name
-app = Dash(__name__)
+from utility import process_attribute_name, call_external_api
+
+app = Dash(__name__, suppress_callback_exceptions=True)
 
 # Load metadata
 with open('metadata.json') as f:
     metadata = json.load(f)
-
-# Function to parse attributes
-
-
-def parse_attributes(attributes):
-    pattern = re.compile(
-        r"Kaleva sports park ➞ (Entire area|Whole area) ➞ (.*?) ➞")
-    parsed_output = []
-    for attribute in attributes:
-        match = pattern.search(attribute['name'])
-        if match:
-            area = match.group(2)
-            parsed_output.append(f"Kaleva sports park ({area})")
-    return parsed_output
-
 
 # Extracting names, descriptions, and parsed attributes
 products = [
@@ -30,7 +17,8 @@ products = [
         "id": item["productId"],
         "name": item["name"],
         "description": item["description"],
-        "attributes": item["attributes"]}
+        "attributes": item["attributes"]
+    }
     for item in metadata
 ]
 
@@ -45,6 +33,7 @@ app.layout = html.Div([
         placeholder='Select a product'
     ),
     html.Div(id='product-info'),
+    html.Div(id='attribute-info'),  # Ensure this is included in the layout
     html.Button('Fetch Historical Data', id='fetch-button', n_clicks=0),
     dcc.Graph(id='historical-data', style={'display': 'none'}),
     html.Button('Predict Next 24 Hours', id='predict-button', n_clicks=0),
@@ -69,14 +58,34 @@ def display_metadata(product_id):
                         html.Span(processed_name, style={
                                   'margin-right': '10px'}),
                         html.Button(
-                            'Fetch Data', id=f'fetch-{attr["id"]}', n_clicks=0, style={'margin-left': '10px'})
+                            'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']}, n_clicks=0, style={'margin-left': '10px'})
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
                 )
             return html.Div([
                 html.H2(product['name']),
-                html.Ul(attributes)
+                html.Div([
+                    html.Ul(attributes, style={
+                            'list-style-type': 'none', 'padding': 0})
+                ], style={'max-height': '200px', 'overflow-y': 'auto',
+                          'border': '1px solid #ccc', 'padding': '10px'})
             ])
     return html.P("Select a product to see details.")
+
+
+@app.callback(
+    Output('attribute-info', 'children'),
+    [Input({'type': 'fetch-data-button', 'index': ALL}, 'n_clicks')],
+    [State({'type': 'fetch-data-button', 'index': ALL}, 'id')]
+)
+def fetch_data(n_clicks, ids):
+    button_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
+    if button_id:
+        attr_id = json.loads(button_id.split('.')[0])['index']
+        data = call_external_api(attr_id)
+        return html.Div([
+            html.P(f"Button {attr_id} clicked."),
+            html.Pre(json.dumps(data, indent=2))
+        ])
 
 
 @app.callback(

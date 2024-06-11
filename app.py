@@ -42,11 +42,7 @@ app.layout = html.Div([
             html.Div(id='attribute-data-graph')
         ],
         style={'marginTop': 50}
-    ),
-    html.Button('Fetch Historical Data', id='fetch-button', n_clicks=0),
-    dcc.Graph(id='historical-data', style={'display': 'none'}),
-    html.Button('Predict Next 24 Hours', id='predict-button', n_clicks=0),
-    dcc.Graph(id='forecast-data', style={'display': 'none'})
+    )
 ])
 
 
@@ -67,7 +63,7 @@ def display_metadata(product_id):
                         html.Span(processed_name, style={
                                   'margin-right': '10px'}),
                         html.Button(
-                            'Fetch Data', id={'type': 'fetch-data-button', 
+                            'Fetch Data', id={'type': 'fetch-data-button',
                                               'index': attr['id']},
                             n_clicks=0, style={'margin-left': '10px'})
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
@@ -90,7 +86,7 @@ def display_metadata(product_id):
 )
 def fetch_data(n_clicks, ids):
     if not any(n_clicks):
-        return "No button clicked yet.", ""
+        return "", ""
     button_id = [p['prop_id'] for p in dash.callback_context.triggered][0]
     if button_id:
         attr_id = json.loads(button_id.split('.')[0])['index']
@@ -113,50 +109,7 @@ def fetch_data(n_clicks, ids):
             ]), dcc.Graph(figure=fig))
         else:
             return html.Div([html.P(f"No statistics found for attribute {attr_id}.")]), ""
-    return "No button clicked.", ""
-
-
-@app.callback(
-    Output('historical-data', 'figure'),
-    Input('fetch-button', 'n_clicks'),
-    Input('product-dropdown', 'value')
-)
-def update_graph(n_clicks, product_id):
-    if not product_id or n_clicks == 0:
-        return {}
-
-    # Placeholder data; replace with actual data fetching logic
-    data = [
-        {"stattime": 1718037360000, "sum": 60},
-        {"stattime": 1718037420000, "sum": 60},
-        {"stattime": 1718037480000, "sum": 60},
-        # Add more data points...
-    ]
-
-    df = pd.DataFrame(data)
-    df['ds'] = pd.to_datetime(df['stattime'], unit='ms')
-    df['y'] = df['sum']
-    df = df[['ds', 'y']]
-
-    fig_historical = px.line(
-        df, x='ds', y='y', title='Historical Occupancy Data')
-
-    return fig_historical
-
-
-@app.callback(
-    Output('forecast-data', 'figure'),
-    Input('predict-button', 'n_clicks'),
-    Input('product-dropdown', 'value')
-)
-def update_forecast(n_clicks, product_id):
-    if not product_id or n_clicks == 0:
-        return {}
-
-    # Placeholder logic for fetching prediction data
-    # Replace with actual call to prediction script or API
-    # For now, return an empty figure
-    return {}
+    return "", ""
 
 
 if __name__ == '__main__':

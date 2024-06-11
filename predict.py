@@ -15,7 +15,7 @@ def make_prediction(data):
 
     # Generate future dataframe starting from the end of the current data
     last_date = df['ds'].max()
-    future = model.make_future_dataframe(periods=7)
+    future = model.make_future_dataframe(periods=30)
     future = future[future['ds'] > last_date]
 
     forecast = model.predict(future)

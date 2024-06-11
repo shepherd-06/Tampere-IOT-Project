@@ -71,15 +71,17 @@ def display_metadata(product_id):
             attributes = []
             for attr in product['attributes']:
                 # processed_name = process_attribute_name(attr['name'])
-                processed_name = attr['name']
-                attributes.append(
-                    html.Li([
-                        html.Span(processed_name, className="mr-3"),
-                        html.Button(
-                            'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']},
-                            n_clicks=0, className="btn btn-primary ml-3")
-                    ], className="d-flex align-items-center mb-2")
-                )
+                if 'user_count' in attr['name'] or 'visit_count' in attr['name']:
+                    processed_name = attr['name']
+                
+                    attributes.append(
+                        html.Li([
+                            html.Span(processed_name, className="mr-3"),
+                            html.Button(
+                                'Fetch Data', id={'type': 'fetch-data-button', 'index': attr['id']},
+                                n_clicks=0, className="btn btn-primary ml-3")
+                        ], className="d-flex align-items-center mb-2")
+                    )
             return html.Div([
                 html.H4(f"Location: {product['name']}",
                         className="my-3 text-center"),
@@ -121,7 +123,7 @@ def fetch_data(n_clicks, ids):
                          color_discrete_sequence=seaborn_palette)
             return (html.Div([
                 html.H3("", className="mt-4"),
-                html.Button('Predict Next 7 Days', id='predict-button',
+                html.Button('Predict Next 30 Days', id='predict-button',
                             n_clicks=0, className="btn btn-primary mt-3")
             ]), dcc.Graph(figure=fig))
         else:
@@ -152,7 +154,7 @@ def update_forecast(n_clicks, graph_data):
         last_time = forecast['ds'].max()
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
-                               title=f'7 Days Forecast from {first_time} to {last_time}',
+                               title=f'30 Days Forecast from {first_time} to {last_time}',
                                labels={'ds': 'Days', 'yhat': 'Occupancy (Total)'},
                                color_discrete_sequence=seaborn_palette)
 

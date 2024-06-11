@@ -70,7 +70,7 @@ def display_metadata(product_id):
                     ], style={'display': 'flex', 'align-items': 'center', 'margin-bottom': '10px'})
                 )
             return html.Div([
-                html.H2(product['name']),
+                html.H2(f"Location: {product['name']}"),
                 html.Div([
                     html.Ul(attributes, style={
                             'list-style-type': 'none', 'padding': 0})
@@ -116,25 +116,36 @@ def fetch_data(n_clicks, ids):
 
 
 @app.callback(
-    Output('prediction-graph', 'children'),
+    [Output('prediction-graph', 'children'),
+     Output('attribute-data-graph', 'style')],
     Input('predict-button', 'n_clicks'),
     State('attribute-data-graph', 'children')
 )
 def update_forecast(n_clicks, graph_data):
     if n_clicks == 0:
-        return ""
+        return "", {"width": "100%"}
 
     if graph_data and 'props' in graph_data:
         fig = graph_data['props']['figure']
-        df = pd.DataFrame(fig['data'][0]['x'], columns=['ds'])
-        df['y'] = fig['data'][0]['y']
+        df = pd.DataFrame(
+            {'ds': fig['data'][0]['x'], 'y': fig['data'][0]['y']})
         forecast = make_prediction(df)
+        
+        first_time = df['ds'].min()
+        last_time = df['ds'].max()
+        first_time = first_time[0:-9]
+        last_time = last_time[0:-9]
+
+        forecast['ds'] = forecast['ds'].dt.strftime('%Y-%m-%d')
+        forecast['yhat'] = forecast['yhat'].round().astype(int)
 
         fig_forecast = px.line(forecast, x='ds', y='yhat',
-                               title='7 Days Forecast')
+                               title=f'7 Days Forecast from {first_time} to {last_time}')
 
-        return dcc.Graph(figure=fig_forecast)
-    return ""
+        return html.Div([
+            html.Div(dcc.Graph(figure=fig_forecast)),
+        ]), {"display": "inline-block"}
+    return "", {"width": "100%"}
 
 
 if __name__ == '__main__':
